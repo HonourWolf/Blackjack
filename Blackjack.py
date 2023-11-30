@@ -22,14 +22,6 @@ def calculate(hand):
             totals[1] += value
     return totals
 
-def dealerActions():
-    dealerTotal = calculate(dealerHand)
-    if dealerTotal[0] <= 16:
-        dealerHand.append(random.choice(cards))
-    if(dealerTotal[0] > 21):
-        print("DEALER BUST.")
-        exit
-
 def selectChoice(playerCash, bet):
     endFlag = False
     while(not endFlag):
@@ -40,34 +32,56 @@ def selectChoice(playerCash, bet):
             case "h":
                 print("Hit")
                 currentHand.append(random.choice(cards))
-                calculate(currentHand)
-                print("Total: %2d/%2d" % (calculate(currentHand)[0], calculate(currentHand)[1]))
-                if(calculate(currentHand)[0]) > 21:
+                changedHand = calculate(currentHand)
+                print("Total: {}/{}".format(changedHand[0], changedHand[1]))
+                if(changedHand[0] > 21):
                     print("PLAYER BUST")
                     playerCash -= bet
                     break
-                dealerActions()
+                calculatedDealerHand = calculate(dealerHand)
+                if(calculatedDealerHand[0] <= 16):
+                    dealerHand.append(random.choice(cards))
+                    calculatedDealerHand = calculate(dealerHand)
+                if(calculatedDealerHand[0] > 21):
+                    print("DEALER BUST.")
+                    playerCash += bet
+                    endFlag = True
             case "s":
+                calculatedCurrentHand = calculate(currentHand)
                 print("Stand")
-                print("Totals: %2d/%2d" % (calculate(currentHand)[0], calculate(currentHand)[1]))
-                dealerActions()
-                print("Dealer Totals: %2d/%2d" % (calculate(dealerHand)[0],calculate(dealerHand)[1]))
-                if(calculate(dealerHand)[0] > 21):
+                print("Total: {}/{}".format(calculatedCurrentHand[0], calculatedCurrentHand[1]))
+                calculatedDealerHand = calculate(dealerHand)
+                
+                
+                if(calculatedDealerHand[0] <= 16):
+                    dealerHand.append(random.choice(cards))
+                    calculatedDealerHand = calculate(dealerHand)
+                
+                if(calculatedDealerHand[0] > 21):
+                    print("DEALER BUST.")
+                    playerCash += bet
+                    endFlag = True
+                print("Dealer Total: {}/{}".format(calculatedDealerHand[0],calculatedDealerHand[1]))
+                
+                if(calculatedDealerHand[0] > 21):
                     print("Dealer bust. You win.")
                     playerCash += bet
-                elif(calculate(currentHand)[1] > 21):
-                    if(calculate(dealerHand)[1] <= 21):
-                        if(calculate(currentHand)[0] > calculate(dealerHand)[0] and calculate(currentHand)[0] > calculate(dealerHand)[1]):
-                            print("You have more than the Dealer. You win.")
-                            playerCash += bet
-                        elif(calculate(currentHand[0] == calculate(dealerHand[0]))):
-                            print("DRAW.")
-                        else:
-                            print("Dealer has more. You lose.")
-                            playerCash -= bet
+                    endFlag = True
+                
+                elif(calculatedDealerHand[1] <= 21 and calculatedCurrentHand[1] <= 21):
+                    if((calculatedCurrentHand[0] > calculatedDealerHand[0] and calculatedCurrentHand[0] > calculatedDealerHand[1])
+                       or (calculatedCurrentHand[1] > calculatedDealerHand[0] and calculatedCurrentHand[1] > calculatedDealerHand[1])):
+                        print("You have more than the dealer.")
+                        playerCash += bet
+                        endFlag = True
+                    else:
+                        print("Dealer has more. You lost.")
+                        playerCash -= bet
+                        endFlag = True
                 else:
-                    print("You have more than the dealer. You win.")
-                    playerCash += bet
+                    print("Dealer has more. You lost.")
+                    playerCash -= bet
+                    endFlag = True
                 endFlag = True
     return playerCash
     
@@ -91,8 +105,6 @@ def bet():
         except ValueError:
             print("Not a valid number, please try again.")
         else:
-            break
-        finally:
             return bet
 
 while(playerCash > 0):
@@ -110,11 +122,16 @@ while(playerCash > 0):
 
     print("Let's deal.")
     while len(dealerHand) < 2:
+        # dealerHand.append("9")
+        # currentHand.append("9")
         dealerHand.append(random.choice(cards))
         currentHand.append(random.choice(cards))
 
     cardsInPlay.append(dealerHand)
     cardsInPlay.append(currentHand)
+
+    calculatedCurrentHand = calculate(currentHand)
+    calculatedDealerHand = calculate(dealerHand)
 
     print("Cards in Play: ", end = "")
     print(cardsInPlay)
@@ -122,8 +139,8 @@ while(playerCash > 0):
     print("Here are your cards.")
     for card in currentHand:
         print(card)
-    print("Total: %2d/%2d" % (calculate(currentHand)[0], calculate(currentHand)[1]))
-    if(calculate(currentHand)[1]) == 21:
+    print("Total: {}/{}".format(calculatedCurrentHand[0], calculatedCurrentHand[1]))
+    if(calculatedCurrentHand[1]) == 21:
         print("JACKPOT")
         playerCash += (currentBet * 1.5)
         continue
