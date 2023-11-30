@@ -53,7 +53,7 @@ def selectChoice(playerCash, bet):
                 calculatedDealerHand = calculate(dealerHand)
                 
                 
-                if(calculatedDealerHand[0] <= 16):
+                while(calculatedDealerHand[0] <= 16):
                     dealerHand.append(random.choice(cards))
                     calculatedDealerHand = calculate(dealerHand)
                 
@@ -68,11 +68,14 @@ def selectChoice(playerCash, bet):
                     playerCash += bet
                     endFlag = True
                 
-                elif(calculatedDealerHand[1] <= 21 and calculatedCurrentHand[1] <= 21):
+                elif(calculatedCurrentHand[1] <= 21):
                     if((calculatedCurrentHand[0] > calculatedDealerHand[0] and calculatedCurrentHand[0] > calculatedDealerHand[1])
                        or (calculatedCurrentHand[1] > calculatedDealerHand[0] and calculatedCurrentHand[1] > calculatedDealerHand[1])):
                         print("You have more than the dealer.")
                         playerCash += bet
+                        endFlag = True
+                    elif(calculatedCurrentHand[0] == calculatedDealerHand[0] or calculatedCurrentHand[1] == calculatedDealerHand[1]):
+                        print("DRAW")
                         endFlag = True
                     else:
                         print("Dealer has more. You lost.")
